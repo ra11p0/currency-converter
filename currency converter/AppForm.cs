@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Windows.Forms;
 using Microsoft.VisualBasic;
 
@@ -24,7 +26,11 @@ namespace currency_converter
 
             //get data from file
             if (!calculator.GetFromFile(dataSourcePath))
-                MessageBox.Show("Could not find the file!");
+            {
+                MessageBox.Show("File not found! File will be downloaded from server.");
+                DownloadFile();
+                calculator.GetFromFile(dataSourcePath);
+            }
             this.Height = 170;
             this.Width = 350;
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
@@ -187,6 +193,14 @@ namespace currency_converter
             {
                 MessageBox.Show("Only numbers are allowed in this field!");
                 source.Text = "";
+            }
+        }
+        private void DownloadFile()
+        {
+            string data = new WebClient().DownloadString(dataSourceURL);
+            using (StreamWriter writer = File.CreateText(dataSourcePath))
+            {
+                writer.Write(data);
             }
         }
     }
