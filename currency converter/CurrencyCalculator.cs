@@ -13,7 +13,7 @@ namespace currency_converter
         public bool Connect(string source)
         {
             XDocument document;
-            //get data from server
+            //get data from server, if exception, return false
             try
             {
                 document = XDocument.Parse(new WebClient().DownloadString(source));
@@ -28,7 +28,7 @@ namespace currency_converter
         public bool GetFromFile(String path)
         {
             XDocument document;
-            //get data from server
+            //get data from file, if exception, return false
             try
             {
                 document = XDocument.Parse(File.ReadAllText(path));
@@ -52,16 +52,18 @@ namespace currency_converter
                 Elements().
                 ToList();
             //generate currencies list
+            //if there are no currency records, return
+            if (curr.Count() == 0) return;
             foreach (XElement element in curr)
                 Currencies.Add(new Currency(element.Attribute("currency").Value, float.Parse(element.Attribute("rate").Value.Replace('.', ','))));
         }
         public float ConvertToEur(Currency from, float ammount)
         {
-            return ammount * from.FromEurFactor;
+            return ammount * from.ToEurFactor;
         }
         public float ConvertFromEur(Currency to, float ammount)
         {
-            return ammount * to.ToEurFactor;
+            return ammount * to.FromEurFactor;
         }
     }
 }

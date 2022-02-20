@@ -175,7 +175,7 @@ namespace currency_converter
         private void SelectedCurrencyChanged(object sender, EventArgs e)
         {
             selectedCurrency = calculator.Currencies.Find(x => x.Symbol.Equals(((ComboBox)sender).SelectedItem));
-            oneEquals.Text = "1 EUR equals " + selectedCurrency.ToEurFactor + " " + selectedCurrency.Symbol;
+            oneEquals.Text = "1 EUR equals " + selectedCurrency.FromEurFactor + " " + selectedCurrency.Symbol;
         }
 
         private void OnlyFloatFunction(object sender, EventArgs e)
@@ -198,10 +198,9 @@ namespace currency_converter
         private void DownloadFile()
         {
             string data = new WebClient().DownloadString(dataSourceURL);
-            using (StreamWriter writer = File.CreateText(dataSourcePath))
-            {
-                writer.Write(data);
-            }
+            StreamWriter writer = File.CreateText(dataSourcePath);
+            using (writer) writer.Write(data);
+            writer.Close();
         }
     }
 }

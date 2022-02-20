@@ -30,19 +30,20 @@ namespace CurrencyCalculatorTests
         [Test]
         public void CheckPathCorrect()
         {
+            //if cant load because theres no such file, user needs to copy file to the tests folder
             Assert.IsTrue(calc.GetFromFile("eurofxref-daily.xml"));
         }
         [Test]
         public void CurrencyCalculationCorrect()
         {
             Currency curr = new Currency("test", 100);
-            Assert.AreEqual(curr.FromEurFactor, 0,01f);
+            Assert.AreEqual(curr.ToEurFactor, 0,01f);
         }
         [Test]
         public void CurrencyCalculationWrong()
         {
             Currency curr = new Currency("test", 100);
-            Assert.AreNotEqual(curr.FromEurFactor, 100f);
+            Assert.AreNotEqual(curr.ToEurFactor, 100f);
         }
         [Test]
         public void TwoWayConvert()
