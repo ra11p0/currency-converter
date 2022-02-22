@@ -14,7 +14,7 @@ namespace currency_converter
         private const string dataSourceURL = "http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
         private const string dataSourcePath = "eurofxref-daily.xml";
         private CurrencyCalculator calculator = new CurrencyCalculator();
-        private Currency selectedCurrency;
+        private string selectedCurrencySymbol;
         private Label oneEquals = new Label();
         private TextBox input = new TextBox();
         private TextBox output = new TextBox();
@@ -25,7 +25,8 @@ namespace currency_converter
             InitializeComponent();
 
             //get data from file
-            if (!calculator.GetFromFile(dataSourcePath))
+            try { calculator.GetFromFile(dataSourcePath); }
+            catch (Exception)
             {
                 MessageBox.Show("File not found! File will be downloaded from server.");
                 DownloadFile();
@@ -82,7 +83,7 @@ namespace currency_converter
 
             //currency selector
             currencySelector.Name = "currencySelector";
-            currencySelector.Items.AddRange(calculator.Currencies.Select(x=> x.Symbol).ToArray());
+            currencySelector.Items.AddRange(calculator.Currencies.Keys.ToArray());
             currencySelector.SelectedIndexChanged += SelectedCurrencyChanged;
             currencySelector.SelectedIndexChanged += Calculate;
             refreshCurrencySelector();
@@ -128,8 +129,11 @@ namespace currency_converter
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 calculator = new CurrencyCalculator();
-                if (!calculator.GetFromFile(openFileDialog.FileName))
+                try { calculator.GetFromFile(openFileDialog.FileName); }
+                catch (Exception)
+                {
                     MessageBox.Show("Could not connect to the server!");
+                }
                 refreshCurrencySelector();
             }
         }
@@ -139,8 +143,8 @@ namespace currency_converter
             string input = Interaction.InputBox("Type URL address to xml file:", "Load from URL", dataSourceURL);
             if (input.Length.Equals(0)) return;
             calculator = new CurrencyCalculator();
-            if(!calculator.Connect(input))
-                MessageBox.Show("Could not connect to the server!");
+            try { calculator.Connect(input); }
+            catch (Exception) {MessageBox.Show("Could not connect to the server!");}
             refreshCurrencySelector();
         }
 
@@ -152,30 +156,30 @@ namespace currency_converter
             {
                 case "input":
                     if (input.Text.Length.Equals(0)) return;
-                    output.Text = calculator.ConvertFromEur(selectedCurrency, float.Parse(input.Text)).ToString();
+                    output.Text = calculator.ConvertFromEur(selectedCurrencySymbol, decimal.Parse(input.Text)).ToString("0.##");
                     break;
                 case "output":
                     if (output.Text.Length.Equals(0)) return;
-                    input.Text = calculator.ConvertToEur(selectedCurrency, float.Parse(output.Text)).ToString();
+                    input.Text = calculator.ConvertToEur(selectedCurrencySymbol, decimal.Parse(output.Text)).ToString("0.##");
                     break;
                 case "currencySelector":
                     if (input.Text.Length.Equals(0) || output.Text.Length.Equals(0)) return;
-                    output.Text = calculator.ConvertFromEur(selectedCurrency, float.Parse(input.Text)).ToString();
+                    output.Text = calculator.ConvertFromEur(selectedCurrencySymbol, decimal.Parse(input.Text)).ToString("0.##");
                     break;
             };
         }
         private void refreshCurrencySelector()
         {
             currencySelector.Items.Clear();
-            currencySelector.Items.AddRange(calculator.Currencies.Select(x => x.Symbol).ToArray());
+            currencySelector.Items.AddRange(calculator.Currencies.Keys.ToArray());
             if (!currencySelector.Items.Count.Equals(0))
                 currencySelector.SelectedIndex = 0;
         }
 
         private void SelectedCurrencyChanged(object sender, EventArgs e)
         {
-            selectedCurrency = calculator.Currencies.Find(x => x.Symbol.Equals(((ComboBox)sender).SelectedItem));
-            oneEquals.Text = "1 EUR equals " + selectedCurrency.FromEurFactor + " " + selectedCurrency.Symbol;
+            selectedCurrencySymbol = (string)((ComboBox)sender).SelectedItem;
+            oneEquals.Text = "1 EUR equals " + calculator.Currencies[selectedCurrencySymbol] + " " + selectedCurrencySymbol;
         }
 
         private void OnlyFloatFunction(object sender, EventArgs e)

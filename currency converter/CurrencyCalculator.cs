@@ -9,8 +9,8 @@ namespace currency_converter
 {
     public class CurrencyCalculator
     {
-        public List<Currency> Currencies { get; } = new List<Currency>();
-        public bool Connect(string source)
+        public Dictionary<string, decimal> Currencies { get; } = new Dictionary<string, decimal>();
+        public void Connect(string source)
         {
             XDocument document;
             //get data from server, if exception, return false
@@ -20,12 +20,11 @@ namespace currency_converter
             }
             catch (Exception)
             {
-                return false;
+                throw;
             }
             parse(document);
-            return true;
         }
-        public bool GetFromFile(String path)
+        public void GetFromFile(String path)
         {
             XDocument document;
             //get data from file, if exception, return false
@@ -35,10 +34,9 @@ namespace currency_converter
             }
             catch (Exception)
             {
-                return false;
+                throw;
             }
             parse(document);
-            return true;
         }
         private void parse(XDocument document)
         {
@@ -55,15 +53,15 @@ namespace currency_converter
             //if there are no currency records, return
             if (curr.Count() == 0) return;
             foreach (XElement element in curr)
-                Currencies.Add(new Currency(element.Attribute("currency").Value, float.Parse(element.Attribute("rate").Value.Replace('.', ','))));
+                Currencies.Add(element.Attribute("currency").Value, decimal.Parse(element.Attribute("rate").Value.Replace('.', ',')));
         }
-        public float ConvertToEur(Currency from, float ammount)
+        public decimal ConvertToEur(string symbol, decimal ammount)
         {
-            return ammount * from.ToEurFactor;
+            return ammount / Currencies[symbol];
         }
-        public float ConvertFromEur(Currency to, float ammount)
+        public decimal ConvertFromEur(string symbol, decimal ammount)
         {
-            return ammount * to.FromEurFactor;
+            return ammount * Currencies[symbol];
         }
     }
 }

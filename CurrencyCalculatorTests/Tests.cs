@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using currency_converter;
+using System;
 
 namespace CurrencyCalculatorTests
 {
@@ -15,42 +16,57 @@ namespace CurrencyCalculatorTests
         [Test]
         public void CheckUrlWrong()
         {
-            Assert.IsFalse(calc.Connect("wrongAddress"));
+            try
+            {
+                calc.Connect("wrongAddress");
+                Assert.Fail();
+            }
+            catch (Exception)
+            {
+                Assert.Pass();
+            }
         }
         [Test]
         public void CheckUrlCorrect()
         {
-            Assert.IsTrue(calc.Connect("http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"));
+            try
+            {
+                calc.Connect("http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml");
+                Assert.Pass();
+            }
+            catch (Exception)
+            {
+                Assert.Fail();
+            }
         }
         [Test]
         public void CheckPathWrong()
         {
-            Assert.IsFalse(calc.GetFromFile("wrongPath"));
+            try
+            {
+                calc.GetFromFile("wrongPath");
+                Assert.Fail();
+            }
+            catch (Exception)
+            {
+                Assert.Pass();
+            }
+            
         }
         [Test]
         public void CheckPathCorrect()
         {
             //if cant load because theres no such file, user needs to copy file to the tests folder
-            Assert.IsTrue(calc.GetFromFile("eurofxref-daily.xml"));
-        }
-        [Test]
-        public void CurrencyCalculationCorrect()
-        {
-            Currency curr = new Currency("test", 100);
-            Assert.AreEqual(curr.ToEurFactor, 0,01f);
-        }
-        [Test]
-        public void CurrencyCalculationWrong()
-        {
-            Currency curr = new Currency("test", 100);
-            Assert.AreNotEqual(curr.ToEurFactor, 100f);
-        }
-        [Test]
-        public void TwoWayConvert()
-        {
-            Currency curr = new Currency("test", 1.234f);
-            float ammount = 1556.78f;
-            Assert.IsTrue(0.01f > ammount - (ammount * curr.FromEurFactor * curr.ToEurFactor));
+            try
+            {
+                calc.GetFromFile("eurofxref-daily.xml");
+                Assert.Pass();
+            }
+            catch (Exception)
+            {
+                Assert.Fail();
+            }
+            
         }
     }
 }
